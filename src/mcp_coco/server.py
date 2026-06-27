@@ -41,6 +41,15 @@ async def tool_index_documents(path: str) -> dict:
 
 
 @mcp.tool(
+    "index_repo",
+    title="Index Repository",
+    description="Index a code repository (code-aware chunking, vendored dirs skipped).",
+)
+async def tool_index_repo(path: str) -> dict:
+    return await index_repo(path)
+
+
+@mcp.tool(
     "search",
     title="Search Index",
     description="Semantic search over indexed repos/documents. "
