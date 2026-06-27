@@ -9,6 +9,7 @@ embedding happens outside any pipeline/runtime.
 
 from __future__ import annotations
 
+import functools
 from typing import Any
 
 import asyncpg
@@ -94,3 +95,19 @@ async def search_semantic(
         }
         for row in rows
     ]
+
+
+@functools.cache
+def _get_reranker() -> Any:
+    from sentence_transformers import CrossEncoder
+
+    return CrossEncoder(config.RERANK_MODEL)
+
+
+def rerank_results(query: str, results: list[dict]) -> list[dict]:
+    reranker = _get_reranker()
+    pairs = [[query, r["snippet"]] for r in results]
+    scores = reranker.predict(pairs).tolist()
+    for r, s in zip(results, scores):
+        r["rerank_score"] = round(float(s), 4)
+    return sorted(results, key=lambda r: r["rerank_score"], reverse=True)
