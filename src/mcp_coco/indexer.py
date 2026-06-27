@@ -36,6 +36,7 @@ from numpy.typing import NDArray
 
 import cocoindex as coco
 from cocoindex.connectors import postgres
+from cocoindex.connectorkits.target import ManagedBy
 from cocoindex.ops.sentence_transformers import SentenceTransformerEmbedder
 from cocoindex.ops.text import RecursiveSplitter
 from cocoindex.resources.chunk import Chunk
@@ -80,9 +81,36 @@ async def coco_lifespan(builder: coco.EnvironmentBuilder) -> AsyncIterator[None]
     async with await asyncpg.create_pool(config.DATABASE_URL) as pool:
         async with pool.acquire() as conn:
             await conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+            await _ensure_table(conn)
         builder.provide(PG_DB, pool)
         builder.provide(EMBEDDER, SentenceTransformerEmbedder(config.EMBED_MODEL))
         yield
+
+
+async def _ensure_table(conn: asyncpg.Connection) -> None:
+    """Create the shared target table and its vector index if they don't exist yet.
+
+    CocoIndex is told not to manage the table DDL (ManagedBy.USER), so this is
+    the single place responsible for schema setup. Multiple apps sharing one table
+    can safely run concurrently without 'relation already exists' errors.
+    """
+    await conn.execute(f"""
+        CREATE TABLE IF NOT EXISTS {config.TABLE_NAME} (
+            id          UUID    PRIMARY KEY,
+            source_kind TEXT    NOT NULL,
+            source_id   TEXT    NOT NULL,
+            location    TEXT    NOT NULL,
+            content_type TEXT   NOT NULL,
+            chunk_start BIGINT  NOT NULL,
+            chunk_end   BIGINT  NOT NULL,
+            text        TEXT    NOT NULL,
+            embedding   vector({config.EMBED_DIMS}) NOT NULL
+        )
+    """)
+    await conn.execute(f"""
+        CREATE INDEX IF NOT EXISTS {config.TABLE_NAME}__vector__embedding
+        ON {config.TABLE_NAME} USING hnsw (embedding vector_cosine_ops)
+    """)
 
 
 @coco.fn
@@ -167,8 +195,8 @@ async def _app_main(
         PG_DB,
         config.TABLE_NAME,
         await postgres.TableSchema.from_class(DocEmbedding, primary_key=["id"]),
+        managed_by=ManagedBy.USER,
     )
-    table.declare_vector_index(column="embedding", metric="cosine", method="hnsw")
 
     walker = sources.walker_for(
         source_kind, pathlib.Path(source_id), only_file=only_file
