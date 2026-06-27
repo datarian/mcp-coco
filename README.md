@@ -60,6 +60,15 @@ Docker-based database:
 DATABASE_URL=postgresql://cocoindex:cocoindex@localhost:5432/cocoindex
 ```
 
+Optional settings:
+
+| Variable | Default | Description |
+|---|---|---|
+| `EMBED_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Embedding model for indexing and search |
+| `RERANK_MODEL` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Cross-encoder model for result re-ranking |
+| `COCO_TABLE_NAME` | `doc_embeddings` | Postgres table name |
+| `COCOINDEX_DB` | `/data/cocoindex/state.db` | Path to CocoIndex incremental state store |
+
 ### 4. Verify the database connection
 
 ```bash
@@ -112,7 +121,20 @@ Once configured, Claude Code can use these tools:
 |---|---|
 | `index_repo(path)` | Index a code repository |
 | `index_documents(path)` | Index a document collection |
-| `search(query, limit, source_kind)` | Semantic search over indexed content |
+| `search(query, limit, source_kind)` | Semantic search — returns condensed summaries and a `results_file` path |
+| `read_search_results(results_file, indices, rerank)` | Retrieve full details for specific results from a previous search |
+
+### Two-stage search
+
+To keep context lean, `search` writes full results to a temporary JSON file
+and returns only condensed summaries (~80-char excerpts) inline. The caller
+triages from the summary, then uses `read_search_results` to fetch full
+details for the results it actually needs.
+
+By default, `read_search_results` re-ranks the selected results using a
+cross-encoder model (`cross-encoder/ms-marco-MiniLM-L-6-v2`) for more
+accurate relevance ordering. Disable with `rerank=false`. The model is
+configurable via the `RERANK_MODEL` environment variable.
 
 ## Development (devcontainer)
 
