@@ -78,6 +78,8 @@ async def coco_lifespan(builder: coco.EnvironmentBuilder) -> AsyncIterator[None]
     state_path.parent.mkdir(parents=True, exist_ok=True)
     builder.settings.db_path = state_path
     async with await asyncpg.create_pool(config.DATABASE_URL) as pool:
+        async with pool.acquire() as conn:
+            await conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
         builder.provide(PG_DB, pool)
         builder.provide(EMBEDDER, SentenceTransformerEmbedder(config.EMBED_MODEL))
         yield
