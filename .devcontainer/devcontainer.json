@@ -1,0 +1,36 @@
+{
+  "name": "cocoindex MCP Dev Container",
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+        "settings": {
+            "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+            "terminal.integrated.shell.linux": "/bin/bash"
+        },
+        "extensions": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-python.isort",
+            "ms-python.vscode-ruff"
+        ]
+    }
+  },
+  "mounts": [
+    "source=/Users/flo/Desktop,target=/host-desktop,type=bind",
+    "source=/Users/flo/dev,target=/host-dev,type=bind"
+   ],
+  "postCreateCommand": "uv sync",
+  "forwardPorts": [8000, 5432],
+  "containerEnv": {
+    "PYTHONPATH": "/workspace/src",
+    "UV_NO_MANAGED_PYTHON": "1"
+  }
+}
