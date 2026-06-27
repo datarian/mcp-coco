@@ -90,7 +90,7 @@ async def search_semantic(
             "location": row["location"],
             "content_type": row["content_type"],
             "score": round(float(row["score"]), 4),
-            "snippet": row["text"][:280],
+            "snippet": row["text"][:1000],
         }
         for row in rows
     ]
