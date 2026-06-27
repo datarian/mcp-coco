@@ -1,0 +1,15 @@
+# Build context exclusions
+.git
+.cocoindex
+.venv
+.env
+.pytest_cache
+__pycache__
+*.pyc
+.devcontainer
+.agents
+.claude
+docs/
+tests/
+hooks/
+.dockerignore
