@@ -9,7 +9,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from .db import close_pool, search_semantic
+from .db import close_pool, rerank_results, search_semantic
 from .indexer import index_documents, index_repo
 
 _EXCERPT_LEN = 80
@@ -93,9 +93,12 @@ async def tool_search(query: str, limit: int = 10, source_kind: str | None = Non
     title="Read Search Results",
     description="Retrieve full details for specific results from a previous search. "
     "Pass the results_file path from a search response and a list of "
-    "result indices (0-based) to fetch.",
+    "result indices (0-based) to fetch. Results are re-ranked by a "
+    "cross-encoder for improved relevance ordering (disable with rerank=false).",
 )
-async def tool_read_search_results(results_file: str, indices: list[int]) -> dict:
+async def tool_read_search_results(
+    results_file: str, indices: list[int], rerank: bool = True
+) -> dict:
     path = Path(results_file)
     if not path.name.startswith(_TEMP_PREFIX) or not path.is_file():
         return {"error": f"Invalid or missing results file: {results_file}"}
@@ -109,6 +112,9 @@ async def tool_read_search_results(results_file: str, indices: list[int]) -> dic
             selected.append(all_results[idx])
         else:
             return {"error": f"Index {idx} out of range (0-{len(all_results) - 1})"}
+
+    if rerank and len(selected) > 1:
+        selected = rerank_results(data["query"], selected)
 
     return {"query": data["query"], "results": selected}
 

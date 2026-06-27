@@ -35,6 +35,11 @@ TABLE_NAME: str = os.environ.get("COCO_TABLE_NAME", "doc_embeddings")
 # if it is ephemeral, every index run re-embeds everything from scratch.
 STATE_DB_PATH: str = os.environ.get("COCOINDEX_DB", "/data/cocoindex/state.db")
 
+# Cross-encoder model used to re-rank search results.
+RERANK_MODEL: str = os.environ.get(
+    "RERANK_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2"
+)
+
 # Logical app-name prefix. The concrete app name also encodes the source so each
 # indexed repo/document-set gets an isolated component tree + state namespace.
 APP_NAME: str = "mcp_coco"
