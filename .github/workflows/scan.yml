@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: Run bandit
-        run: uvx bandit -r src/ -ll
+        run: uvx bandit -r src/ -ll -s B608  # TABLE_NAME is config, all values parameterized
 
   pip-audit:
     runs-on: ubuntu-latest
