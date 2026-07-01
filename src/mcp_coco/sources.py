@@ -25,13 +25,25 @@ SOURCE_KINDS = ("repo", "document")
 
 # Directories that should never be indexed when walking a repository.
 _REPO_EXCLUDES = [
-    "**/.git/**", "**/.hg/**", "**/.svn/**",
-    "**/node_modules/**", "**/bower_components/**",
-    "**/.venv/**", "**/venv/**", "**/env/**",
-    "**/__pycache__/**", "**/.mypy_cache/**", "**/.pytest_cache/**",
-    "**/.ruff_cache/**", "**/.tox/**",
-    "**/dist/**", "**/build/**", "**/.next/**", "**/target/**",
-    "**/.idea/**", "**/.vscode/**",
+    "**/.git/**",
+    "**/.hg/**",
+    "**/.svn/**",
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/env/**",
+    "**/__pycache__/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/.ruff_cache/**",
+    "**/.tox/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/target/**",
+    "**/.idea/**",
+    "**/.vscode/**",
 ]
 
 # Lighter excludes for a document collection (still skip VCS metadata).
@@ -72,7 +84,9 @@ def walker_for(
         matcher = PatternFilePathMatcher(included_patterns=[only_file])
         return localfs.walk_dir(root, recursive=False, path_matcher=matcher)
     matcher = PatternFilePathMatcher(
-        included_patterns=[f"**/*{ext}" for ext in sorted(included_extensions(source_kind))],
+        included_patterns=[
+            f"**/*{ext}" for ext in sorted(included_extensions(source_kind))
+        ],
         excluded_patterns=profile["excludes"],
     )
     return localfs.walk_dir(root, recursive=True, path_matcher=matcher)

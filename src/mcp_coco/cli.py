@@ -78,7 +78,9 @@ async def _cmd_search(args: argparse.Namespace) -> None:
         print("No results (is anything indexed yet?).")
         return
     for i, r in enumerate(results, 1):
-        print(f"{i:>2}. [{r['score']:.3f}] {r['source_kind']}:{r['location']} ({r['content_type']})")
+        print(
+            f"{i:>2}. [{r['score']:.3f}] {r['source_kind']}:{r['location']} ({r['content_type']})"
+        )
         snippet = " ".join(r["snippet"].split())
         print(f"    {snippet}")
 
@@ -110,7 +112,9 @@ async def _cmd_visualize(_args: argparse.Namespace) -> None:
         await close_pool()
 
     if not rows:
-        console.print("[yellow]Nothing indexed yet.[/] Run [bold]just index <path>[/] first.")
+        console.print(
+            "[yellow]Nothing indexed yet.[/] Run [bold]just index <path>[/] first."
+        )
         return
 
     # Group rows by (source_kind, source_id) for the tree.

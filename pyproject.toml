@@ -35,7 +35,19 @@ python_files = ["tests/test_*.py"]
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "W", "I", "C", "N", "D", "QB", "B", "RUF"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "C", "N", "D", "B", "RUF"]
+ignore = [
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "E402",  # Module level import not at top of file
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/mcp_coco/cli.py" = ["E501"]
+"src/mcp_coco/config.py" = ["D100", "E501"]
+"src/mcp_coco/sources.py" = ["E501"]
 
 [dependency-groups]
 dev = [

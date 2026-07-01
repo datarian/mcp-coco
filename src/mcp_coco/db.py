@@ -108,6 +108,6 @@ def rerank_results(query: str, results: list[dict]) -> list[dict]:
     reranker = _get_reranker()
     pairs = [[query, r["snippet"]] for r in results]
     scores = reranker.predict(pairs).tolist()
-    for r, s in zip(results, scores):
+    for r, s in zip(results, scores, strict=False):
         r["rerank_score"] = round(float(s), 4)
     return sorted(results, key=lambda r: r["rerank_score"], reverse=True)

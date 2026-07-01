@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import tempfile
 from contextlib import asynccontextmanager
@@ -77,7 +78,9 @@ def _condense(results: list[dict]) -> list[dict]:
     "specific results. "
     "Optionally filter by source_kind ('repo' or 'document').",
 )
-async def tool_search(query: str, limit: int = 10, source_kind: str | None = None) -> dict:
+async def tool_search(
+    query: str, limit: int = 10, source_kind: str | None = None
+) -> dict:
     results = await search_semantic(query, limit=limit, source_kind=source_kind)
     results_file = _write_results_file(query, results) if results else None
     return {
@@ -120,8 +123,22 @@ async def tool_read_search_results(
 
 
 def main() -> None:
-    """Run the MCP server over stdio."""
-    mcp.run(transport="stdio")
+    """Run the MCP server. Defaults to stdio; pass --transport for HTTP/SSE."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--transport", default="stdio", choices=["stdio", "sse", "streamable-http"]
+    )
+    parser.add_argument(
+        "--host", default="127.0.0.1", help="Bind address (HTTP transports only)"
+    )
+    parser.add_argument(
+        "--port", default=8000, type=int, help="Port (HTTP transports only)"
+    )
+    args = parser.parse_args()
+
+    mcp.settings.host = args.host
+    mcp.settings.port = args.port
+    mcp.run(transport=args.transport)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,9 @@ DATABASE_URL: str = os.environ.get(
 
 # Sentence-transformers model used for both indexing and query embedding.
 # Both sides must use the same model so vectors share one space.
-EMBED_MODEL: str = os.environ.get("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+EMBED_MODEL: str = os.environ.get(
+    "EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+)
 # Output dimension of EMBED_MODEL. Must match the model above.
 EMBED_DIMS: int = int(os.environ.get("EMBED_DIMS", "384"))
 

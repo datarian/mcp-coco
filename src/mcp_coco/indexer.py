@@ -32,16 +32,15 @@ from dataclasses import dataclass
 from typing import Annotated
 
 import asyncpg
-from numpy.typing import NDArray
-
 import cocoindex as coco
-from cocoindex.connectors import postgres
 from cocoindex.connectorkits.target import ManagedBy
+from cocoindex.connectors import postgres
 from cocoindex.ops.sentence_transformers import SentenceTransformerEmbedder
 from cocoindex.ops.text import RecursiveSplitter
 from cocoindex.resources.chunk import Chunk
 from cocoindex.resources.file import FileLike
 from cocoindex.resources.id import generate_uuid
+from numpy.typing import NDArray
 
 from . import config, formats, sources
 
